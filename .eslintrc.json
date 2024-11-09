@@ -1,3 +1,15 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": [
+    "eslint:recommended",
+    "standard",
+    "plugin:tailwindcss/recommended",
+    "prettier"
+  ],
+  "plugins": ["tailwindcss", "prettier"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "semi": ["error", "never"],
+    "tailwindcss/classnames-order": "warn",
+    "prettier/prettier": ["error", { "singleQuote": true, "semi": false }]
+  }
 }

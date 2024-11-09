@@ -1,0 +1,141 @@
+"use client"
+
+import React, { useState } from 'react'
+import { z } from "zod"
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from "react-hook-form"
+
+import { Button } from '@/components/ui/button'
+
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import Image from 'next/image'
+import Link from 'next/link'
+import { useFormStatus } from 'react-dom'
+import { createAccount, signIn } from '@/lib/actions/user.actions'
+import OTPModal from './OTPModal';
+
+
+
+
+type FormType = "sign-in" | "sign-up";
+
+const authFormSchema = (formType: FormType) => {
+    return z.object({
+        email: z.string().email(),
+        fullName: formType === "sign-up" ? z.string().min(2).max(50) : z.string().optional()
+    })
+}
+
+const AuthForm = ({ type }: { type: FormType }) => {
+    const isSignIn = type === "sign-in"
+    const [loading, setLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+    const [accountId, setAccountId] = useState("")
+
+    const formSchema = authFormSchema(type)
+
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            fullName: "",
+            email: ""
+        }
+    })
+
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        setLoading(true)
+        setErrorMessage('')
+        try {
+            const user = isSignIn
+                ? await signIn({ email: values.email })
+                : await createAccount({ email: values.email, fullName: values.fullName || '' })
+            setAccountId(user.accountId)
+
+        } catch (error) {
+            setErrorMessage("Failed to create account. Please try again ")
+        } finally {
+            setLoading(false)
+        }
+
+
+    }
+
+    return (
+        <>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form">
+                    <h1 className='form-title'>{type === "sign-in" ? "Sign In" : "Sing UP"}</h1>
+
+                    {!isSignIn &&
+                        <FormField
+                            control={form.control}
+                            name="fullName"
+                            render={({ field }) => (
+                                <FormItem >
+                                    <div className='shad-form-item'>
+                                        <FormLabel className='shad-form-label' >Full Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter your full name" {...field} />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage className='shad-form-message' />
+                                </FormItem>
+                            )}
+                        />
+                    }
+
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem >
+                                <div className='shad-form-item'>
+                                    <FormLabel className='shad-form-label' >Email</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter your email" {...field} />
+                                    </FormControl>
+                                </div>
+                                <FormMessage className='shad-form-message' />
+                            </FormItem>
+                        )}
+                    />
+
+                    <Button type="submit" className='form-submit-button' disabled={loading}>
+                        {isSignIn ? "Sign In" : "Sign Up"}
+
+                        {loading && <Image src="/assets/icons/loader.svg" alt='loader' width={24} height={24} className='ml-2 animate-spin' />}
+                    </Button>
+
+                    {errorMessage &&
+                        <p className='error-message'>*{errorMessage}</p>
+                    }
+                    <div className='body-2 flex justify-center'>
+                        <p className='text-light-100'>
+                            {isSignIn
+                                ? "Don't have an account?"
+                                : "Already have an account?"
+                            }
+                        </p>
+                        <Link href={isSignIn ? "/sign-up" : "sign-in"} className='ml-1 font-medium text-brand'>
+                            {isSignIn
+                                ? "Sign Up"
+                                : "Sign In"
+
+                            }
+                        </Link>
+
+                    </div>
+                </form>
+            </Form>
+
+            {accountId &&
+                <OTPModal email={form.getValues("email")} accountId={accountId} />
+            }
+        </>
+    )
+}
+
+export default AuthForm
