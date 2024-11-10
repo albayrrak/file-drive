@@ -21,13 +21,13 @@ import { signOut } from '@/lib/actions/user.actions'
 
 
 interface IProps {
-  ownerId: string;
+  $id: string;
   accountId: string;
   fullName: string;
   avatar: string;
   email: string;
 }
-const MobileNavigation: React.FC<IProps> = ({ ownerId, accountId, fullName, avatar, email }) => {
+const MobileNavigation: React.FC<IProps> = ({ $id: ownerId, accountId, fullName, avatar, email }) => {
 
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
@@ -66,7 +66,7 @@ const MobileNavigation: React.FC<IProps> = ({ ownerId, accountId, fullName, avat
           <Separator className='my-5 bg-light-200/20 ' />
 
           <div className='flex flex-col justify-between gap-5 pb-5'>
-            <FileUploader />
+            <FileUploader accountId={accountId} ownerId={ownerId} />
             <Button type="submit" className='mobile-sign-out-button' onClick={signOut}>
               <Image src={"/assets/icons/logout.svg"} alt='logout' width={24} height={24} className='w-6' />
               <p>Logout</p>
