@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "upload.wikimedia.org"
+      },
+      {
+        protocol: "https",
+        hostname: "cloud.appwrite.io"
+      },
+      {
+        protocol: "https",
+        hostname: "img.freepik.com"
       }
     ]
   }

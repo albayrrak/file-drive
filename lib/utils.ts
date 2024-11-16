@@ -62,6 +62,7 @@ export const getFileType = (fileName: string) => {
     "afphoto",
     "afphoto",
   ];
+
   const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"];
   const videoExtensions = ["mp4", "avi", "mov", "mkv", "webm"];
   const audioExtensions = ["mp3", "wav", "ogg", "flac"];
@@ -72,7 +73,7 @@ export const getFileType = (fileName: string) => {
   if (videoExtensions.includes(extension)) return { type: "video", extension };
   if (audioExtensions.includes(extension)) return { type: "audio", extension };
 
-  return { type: "other", extension };
+  return { type: "other", extension }
 };
 
 export const formatDateTime = (isoString: string | null | undefined) => {
