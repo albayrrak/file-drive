@@ -6,9 +6,13 @@ import { getCurrentUser } from '@/lib/actions/user.actions'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
+
+export const dynamic = "force-dynamic"
 interface IProps {
     children: React.ReactNode
 }
+
+
 const Layout: React.FC<IProps> = async ({ children }) => {
     const currentUser = await getCurrentUser()
 
@@ -20,7 +24,7 @@ const Layout: React.FC<IProps> = async ({ children }) => {
 
             <section className='flex h-full flex-1 flex-col'>
                 <MobileNavigation  {...currentUser} />
-                <Header userId={currentUser.$id} accountId={currentUser.accountId}  />
+                <Header userId={currentUser.$id} accountId={currentUser.accountId} />
                 <div className='main-content'>
                     {children}
                 </div>

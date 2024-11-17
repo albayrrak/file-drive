@@ -14,11 +14,10 @@ export const metadata: Metadata = {
   description: "StoreIt - The only storage solution you need.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+
+
+
   return (
     <html lang="en">
       <body className={`${poppins.variable} font-poppins antialiased`}  >

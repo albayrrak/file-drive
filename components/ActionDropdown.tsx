@@ -10,6 +10,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
+import { deleteFile, renameFile, updateFileUsers } from '@/lib/actions/file.actions'
+import { usePathname } from 'next/navigation'
+import { FileDetails, ShareInput } from './ActionsModalContent'
 
 const ActionDropdown = ({ file }: { file: Models.Document }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +21,9 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     const [action, setAction] = useState<ActionType | null>(null)
     const [name, setName] = useState(file.name)
     const [loading, setLoading] = useState(false)
+    const [emails, setEmails] = useState<string[]>([])
+
+    const pathname = usePathname()
 
     const closeAllModals = () => {
         setIsDropdownOpen(false)
@@ -26,19 +32,55 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
         setName(file.name)
     }
 
-    const handleAction = async () => { }
+    const handleAction = async () => {
+        setLoading(true)
+
+        let success = false
+
+        const actions = {
+            rename: () => renameFile({ id: file.$id, name: name, extension: file.extension, path: pathname }),
+            share: () => updateFileUsers({ id: file.$id, emails: emails, path: pathname }),
+            delete: () => deleteFile({ id: file.$id, bucketFileId: file.bucketFileId, path: pathname })
+        }
+
+        success = await actions[action?.value as keyof typeof actions]()
+
+        if (success) closeAllModals()
+
+        setLoading(false)
+
+
+    }
+
+    const handleRemoveUser = async (email: string) => {
+        const updatedEmails = emails.filter((e) => e !== email)
+
+        const success = await updateFileUsers({ id: file.$id, emails: updatedEmails, path: pathname })
+
+        if (success) {
+            setEmails(updatedEmails)
+            closeAllModals()
+        }
+    }
 
     const renderDialogContent = () => {
 
         if (!action) return null
         const { value, label } = action
+
         return (
             <DialogContent className='shad-dialog button'>
                 <DialogHeader className='flex flex-col gap-3'>
                     <DialogTitle className='text-center text-light-100'>{label}</DialogTitle>
-                    <DialogDescription>
-                        {value === "rename" && <Input type='text' value={name} onChange={(e) => setName(e.target.value)} />}
-                    </DialogDescription>
+                    {value === "rename" && <Input type='text' value={name} onChange={(e) => setName(e.target.value)} />}
+                    {value === "details" && <FileDetails file={file} />}
+                    {value === "share" && <ShareInput file={file} onInputChange={setEmails} onRemove={handleRemoveUser} />}
+                    {value === "delete" && (
+                        <p className='delete-confirmation'>Are your sure want to delete {``}
+                            <span className='delete-file-name'>{file.name}</span>?
+                        </p>
+                    )}
+
                 </DialogHeader>
                 {['rename', 'delete', 'share'].includes(value) && (
                     <DialogFooter className='flex flex-col gap-3 md:flex-row'>
